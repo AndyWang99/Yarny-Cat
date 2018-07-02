@@ -25,6 +25,7 @@ public class Cat {
     //private Sound meow;
     private Sound running;
     private Sound jumping;
+    private Sound death;
     private boolean isRunning = false;
 
     public Cat(int x, int y) {
@@ -45,6 +46,7 @@ public class Cat {
         //meow = Gdx.audio.newSound(Gdx.files.internal("catmeow.wav"));
         running = Gdx.audio.newSound(Gdx.files.internal("running.wav"));
         jumping = Gdx.audio.newSound(Gdx.files.internal("jumping.wav"));
+        death = Gdx.audio.newSound(Gdx.files.internal("deathsound.wav"));
     }
 
     public Texture getTexture() {
@@ -93,6 +95,7 @@ public class Cat {
         //meow.dispose();
         running.dispose();
         jumping.dispose();
+        death.dispose();
     }
 
     public void pounce() {
@@ -121,5 +124,9 @@ public class Cat {
     public void stopSound() {
         running.stop();
         jumping.stop();
+    }
+
+    public void playDeathSound() {
+        death.play(0.5f);
     }
 }
