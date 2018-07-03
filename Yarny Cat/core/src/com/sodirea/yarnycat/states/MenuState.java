@@ -3,6 +3,7 @@ package com.sodirea.yarnycat.states;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector3;
 import com.sodirea.yarnycat.YarnyCat;
 import com.sodirea.yarnycat.sprites.Cat;
 
@@ -13,6 +14,7 @@ public class MenuState extends State {
     private Texture playBtn;
     private Texture title;
     private Texture ground;
+    private Texture creditsBtn;
     private float bgPos1;
     private float bgPos2;
     private float groundPos1;
@@ -25,6 +27,7 @@ public class MenuState extends State {
         playBtn = new Texture("playbtn.png");
         title = new Texture("title.png");
         ground = new Texture("ground.png");
+        creditsBtn = new Texture("creditsbtn.png");
         bgPos1 = cam.position.x - cam.viewportWidth / 2;
         bgPos2 = bgPos1 + bg.getWidth();
         groundPos1 = cam.position.x - cam.viewportWidth / 2;
@@ -37,7 +40,15 @@ public class MenuState extends State {
 
     @Override
     public void handleInput() {
-        if (Gdx.input.justTouched()) {
+        Vector3 mousePos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+        cam.unproject(mousePos);
+        if (mousePos.x > cam.position.x - creditsBtn.getWidth() / 2 - cam.viewportWidth / 3
+                && mousePos.x < cam.position.x + creditsBtn.getWidth() / 2 - cam.viewportWidth / 3
+                && mousePos.y > cam.position.y - cam.viewportHeight / 6 + playBtn.getHeight() / 2 - creditsBtn.getHeight() / 2
+                && mousePos.y < cam.position.y - cam.viewportHeight / 6 + playBtn.getHeight() / 2 + creditsBtn.getHeight() / 2
+                && Gdx.input.justTouched()) {
+            gsm.set(new CreditState(gsm));
+        } else if (Gdx.input.justTouched()) {
             gsm.set(new PlayState(gsm));
         }
     }
@@ -75,6 +86,7 @@ public class MenuState extends State {
         sb.draw(ground, groundPos1, cam.position.y - cam.viewportHeight / 2 - GROUND_OFFSET);
         sb.draw(ground, groundPos2, cam.position.y - cam.viewportHeight / 2 - GROUND_OFFSET);
         cat.render(sb);
+        sb.draw(creditsBtn, cam.position.x - creditsBtn.getWidth() / 2 - cam.viewportWidth / 3, cam.position.y - cam.viewportHeight / 6 + playBtn.getHeight() / 2 - creditsBtn.getHeight() / 2);
         sb.end();
     }
 
@@ -83,5 +95,8 @@ public class MenuState extends State {
         bg.dispose();
         playBtn.dispose();
         title.dispose();
+        ground.dispose();
+        cat.dispose();
+        creditsBtn.dispose();
     }
 }
