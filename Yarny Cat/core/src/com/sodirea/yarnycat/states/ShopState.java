@@ -105,17 +105,39 @@ public class ShopState extends State {
         }
         for (ImageButton skin : skinsArray) {
             if (skin.isPressed()) {
-                catSkinName = skin.getName();
-                catArray.removeRange(0, catArray.size - 1);
-                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "1.png"));
-                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "2.png"));
-                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "3.png"));
-                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "4.png"));
-                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "5.png"));
-                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "6.png"));
-                catAnim = new Animation(catArray, 0.2f);
-                pref.putString("catskin", catSkinName);
-                pref.flush();
+                // checking if they own the current skin. if they do, then switch to this current skin, i.e. animate it. if they don't, then prompt them to purchase)
+                if (pref.getBoolean(skin.getName() + "Own", false)) {
+                    catSkinName = skin.getName();
+                    catArray.removeRange(0, catArray.size - 1);
+                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "1.png"));
+                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "2.png"));
+                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "3.png"));
+                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "4.png"));
+                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "5.png"));
+                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "6.png"));
+                    catAnim = new Animation(catArray, 0.2f);
+                    pref.putString("catskin", catSkinName);
+                    pref.flush();
+                } else {
+                    // if they have sufficient currency, buy it and make it the active skin. otherwise, prompt that they don't have enough money
+                    if (pref.getInteger("currency", 0) >= pref.getInteger(skin.getName() + "Price")) {
+                        pref.putInteger("currency", pref.getInteger("currency") - pref.getInteger(skin.getName() + "Price"));
+                        pref.putBoolean(skin.getName() + "Own", true);
+                        catSkinName = skin.getName();
+                        catArray.removeRange(0, catArray.size - 1);
+                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "1.png"));
+                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "2.png"));
+                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "3.png"));
+                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "4.png"));
+                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "5.png"));
+                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "6.png"));
+                        catAnim = new Animation(catArray, 0.2f);
+                        pref.putString("catskin", catSkinName);
+                        pref.flush();
+                    } else {
+                        System.out.println("Not enough fish!");
+                    }
+                }
             }
         }
     }
@@ -125,6 +147,7 @@ public class ShopState extends State {
         handleInput();
         catAnim.update(dt);
         for (ImageButton skin : skinsArray) {
+            // if the equipped skin is the same as the current imagebutton in the array, then animate the image
             if (catSkinName.equals(skin.getName())) {
                 Cell currentCell = btnTable.getCell(skin);
                 ImageButton skinAnim = new ImageButton(new TextureRegionDrawable(new TextureRegion(catAnim.getActiveTexture())));
@@ -133,7 +156,11 @@ public class ShopState extends State {
                     currentCell.setActor(skinAnim);
                 }
                 skinsArray.removeValue(skin, true);
-                skinsArray.add(skinAnim); /// NEED TO _SET_ THE REMOVED'D INDEXES SKIN, NOT JUST ADD (o/w indexing errors).. or wait no, it doesnt matter.. because i only need everthing in the array to loop through and search through it. it doesn't affect the placement of the buttons (since im just setting the new button to the same cell
+                skinsArray.add(skinAnim);
+            }
+            // checking if they own the current skin. if they don't, then set the button's image's colour to a gray tint (to signify that it's unpurchased)
+            if (!pref.getBoolean(skin.getName() + "Own", false)) {
+                skin.getImage().setColor(Color.GRAY); // maybe use light_gray instead, for more visibility?
             }
         }
         stage.act(dt);

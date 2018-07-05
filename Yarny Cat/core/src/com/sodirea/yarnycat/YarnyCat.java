@@ -23,6 +23,7 @@ public class YarnyCat extends ApplicationAdapter {
 	private SpriteBatch sb;
 	private boolean outOfApp;
 	private Music music;
+	private Preferences pref;
 	
 	@Override
 	public void create () {
@@ -34,6 +35,10 @@ public class YarnyCat extends ApplicationAdapter {
 		music.setLooping(true);
 		music.setVolume(0.4f);
 		music.play();
+		pref = Gdx.app.getPreferences("My Preferences");
+		pref.putBoolean("catOwn", true); // give them ownership of the default cat skin
+		pref.putInteger("hellcatPrice", 1); // init cost of skins
+		pref.flush();
 		gsm.push(new MenuState(gsm)); // Seeing main menu is first thing they should see when opening app
 	}
 
