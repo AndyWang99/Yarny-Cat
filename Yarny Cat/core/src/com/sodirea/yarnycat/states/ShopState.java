@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -19,6 +20,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.sodirea.yarnycat.YarnyCat;
+import com.sodirea.yarnycat.sprites.Animation;
 
 public class ShopState extends State {
 
@@ -34,6 +36,9 @@ public class ShopState extends State {
     private Preferences pref;
     private Texture currencyIcon;
     private BitmapFont fingerpaint32;
+    private Array<Texture> catArray;
+    private String catSkinName;
+    private Animation catAnim;
 
     protected ShopState(GameStateManager gsm) {
         super(gsm);
@@ -46,6 +51,16 @@ public class ShopState extends State {
         fingerpaint32 = new BitmapFont(Gdx.files.internal("fingerpaint32.fnt"), Gdx.files.internal("fingerpaint32.png"), false);
         fingerpaint32.setColor(new Color(0, (float) 191/255, (float) 241/255, 1));
         skinsArray = new Array<ImageButton>();
+
+        catSkinName = pref.getString("catskin", "cat");
+        catArray = new Array<Texture>();
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "1.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "2.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "3.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "4.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "5.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "6.png"));
+        catAnim = new Animation(catArray, 0.2f);
 
         stage = new Stage(new StretchViewport(cam.viewportWidth, cam.viewportHeight));
         Gdx.input.setInputProcessor(stage);
@@ -90,7 +105,16 @@ public class ShopState extends State {
         }
         for (ImageButton skin : skinsArray) {
             if (skin.isPressed()) {
-                pref.putString("catskin", skin.getName());
+                catSkinName = skin.getName();
+                catArray.removeRange(0, catArray.size - 1);
+                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "1.png"));
+                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "2.png"));
+                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "3.png"));
+                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "4.png"));
+                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "5.png"));
+                catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "6.png"));
+                catAnim = new Animation(catArray, 0.2f);
+                pref.putString("catskin", catSkinName);
                 pref.flush();
             }
         }
@@ -99,6 +123,19 @@ public class ShopState extends State {
     @Override
     public void update(float dt) {
         handleInput();
+        catAnim.update(dt);
+        for (ImageButton skin : skinsArray) {
+            if (catSkinName.equals(skin.getName())) {
+                Cell currentCell = btnTable.getCell(skin);
+                ImageButton skinAnim = new ImageButton(new TextureRegionDrawable(new TextureRegion(catAnim.getActiveTexture())));
+                skinAnim.setName(catSkinName);
+                if(currentCell != null) {
+                    currentCell.setActor(skinAnim);
+                }
+                skinsArray.removeValue(skin, true);
+                skinsArray.add(skinAnim); /// NEED TO _SET_ THE REMOVED'D INDEXES SKIN, NOT JUST ADD (o/w indexing errors).. or wait no, it doesnt matter.. because i only need everthing in the array to loop through and search through it. it doesn't affect the placement of the buttons (since im just setting the new button to the same cell
+            }
+        }
         stage.act(dt);
     }
 
