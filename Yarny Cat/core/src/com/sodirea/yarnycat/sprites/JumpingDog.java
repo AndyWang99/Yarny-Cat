@@ -34,7 +34,7 @@ public class JumpingDog { ///////////////////////add diff texture/recolour for t
         position = new Vector2(x, y);
         velocity = new Vector2(0, DOG_MIN_JUMPING_VELOCITY + new Random().nextInt(DOG_MAX_ADDITIONAL_JUMPING_VELOCITY));
         textures = new Array<Texture>();
-        textures.add(new Texture("dog.png"));
+        textures.add(new Texture("dog1.png"));
         textures.add(new Texture("dog2.png"));
         textures.add(new Texture("dog3.png"));
         textures.add(new Texture("dog4.png"));

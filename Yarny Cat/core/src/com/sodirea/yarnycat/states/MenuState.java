@@ -15,6 +15,7 @@ public class MenuState extends State {
     private Texture title;
     private Texture ground;
     private Texture creditsBtn;
+    private Texture shopBtn;
     private float bgPos1;
     private float bgPos2;
     private float groundPos1;
@@ -28,6 +29,7 @@ public class MenuState extends State {
         title = new Texture("title.png");
         ground = new Texture("ground.png");
         creditsBtn = new Texture("creditsbtn.png");
+        shopBtn = new Texture("shopbtn.png");
         bgPos1 = cam.position.x - cam.viewportWidth / 2;
         bgPos2 = bgPos1 + bg.getWidth();
         groundPos1 = cam.position.x - cam.viewportWidth / 2;
@@ -48,6 +50,12 @@ public class MenuState extends State {
                 && mousePos.y < cam.position.y - cam.viewportHeight / 6 + playBtn.getHeight() / 2 + creditsBtn.getHeight() / 2
                 && Gdx.input.justTouched()) {
             gsm.set(new CreditState(gsm));
+        } else if (mousePos.x > cam.position.x - shopBtn.getWidth() / 2 + cam.viewportWidth / 3
+                && mousePos.x < cam.position.x + shopBtn.getWidth() / 2 + cam.viewportWidth / 3
+                && mousePos.y > cam.position.y - cam.viewportHeight / 6 + playBtn.getHeight() / 2 - shopBtn.getHeight() / 2
+                && mousePos.y < cam.position.y - cam.viewportHeight / 6 + playBtn.getHeight() / 2 + shopBtn.getHeight() / 2
+                && Gdx.input.justTouched()) {
+            gsm.set(new ShopState(gsm));
         } else if (Gdx.input.justTouched()) {
             gsm.set(new PlayState(gsm));
         }
@@ -87,6 +95,7 @@ public class MenuState extends State {
         sb.draw(ground, groundPos2, cam.position.y - cam.viewportHeight / 2 - GROUND_OFFSET);
         cat.render(sb);
         sb.draw(creditsBtn, cam.position.x - creditsBtn.getWidth() / 2 - cam.viewportWidth / 3, cam.position.y - cam.viewportHeight / 6 + playBtn.getHeight() / 2 - creditsBtn.getHeight() / 2);
+        sb.draw(shopBtn, cam.position.x - shopBtn.getWidth() / 2 + cam.viewportWidth / 3, cam.position.y - cam.viewportHeight / 6 + playBtn.getHeight() / 2 - shopBtn.getHeight() / 2);
         sb.end();
     }
 
@@ -98,5 +107,6 @@ public class MenuState extends State {
         ground.dispose();
         cat.dispose();
         creditsBtn.dispose();
+        shopBtn.dispose();
     }
 }

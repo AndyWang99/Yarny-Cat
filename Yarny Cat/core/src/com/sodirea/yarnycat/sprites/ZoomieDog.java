@@ -32,7 +32,7 @@ public class ZoomieDog {
         position = new Vector2(x, y);
         velocity = new Vector2(DOG_MIN_RUNNING_VELOCITY + new Random().nextInt(DOG_MAX_ADDITIONAL_RUNNING_VELOCITY) - (new Random().nextInt(DOG_MIN_RUNNING_VELOCITY + DOG_MAX_ADDITIONAL_RUNNING_VELOCITY)), 0);
         textures = new Array<Texture>();
-        textures.add(new Texture("dog.png"));
+        textures.add(new Texture("dog1.png"));
         textures.add(new Texture("dog2.png"));
         textures.add(new Texture("dog3.png"));
         textures.add(new Texture("dog4.png"));

@@ -1,6 +1,7 @@
 package com.sodirea.yarnycat.sprites;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -19,6 +20,8 @@ public class Cat {
     private Vector2 position;
     private Vector2 velocity;
     private Array<Texture> catArray;
+    private Preferences pref;
+    private String catSkinName;
     private Texture pounce;
     private Animation catAnim;
     private Rectangle bound;
@@ -33,15 +36,17 @@ public class Cat {
         initialY = ground.getHeight() - GROUND_OFFSET;
         position = new Vector2(x, y);
         velocity = new Vector2(0, 0);
+        pref = Gdx.app.getPreferences("My Preferences");
+        catSkinName = pref.getString("catskin", "cat");
         catArray = new Array<Texture>();
-        catArray.add(new Texture("cat.png"));
-        catArray.add(new Texture("cat2.png"));
-        catArray.add(new Texture("cat3.png"));
-        catArray.add(new Texture("cat4.png"));
-        catArray.add(new Texture("cat5.png"));
-        catArray.add(new Texture("cat6.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "1.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "2.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "3.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "4.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "5.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "6.png"));
         catAnim = new Animation(catArray, 0.2f);
-        pounce = new Texture("pounce.png");
+        pounce = new Texture("cat skins/" + catSkinName + "/" + catSkinName + "pounce.png");
         bound = new Rectangle(position.x, position.y + (float) (catAnim.getActiveTexture().getHeight() * 0.21), catAnim.getActiveTexture().getWidth(), catAnim.getActiveTexture().getHeight() - (float) (catAnim.getActiveTexture().getHeight() * 0.21)); // remove legs from hitbox; it has no effect on the overall hit box when walking, and has little effect when jumping (due to the nature of the sprite)
         //meow = Gdx.audio.newSound(Gdx.files.internal("catmeow.wav"));
         running = Gdx.audio.newSound(Gdx.files.internal("running.wav"));
