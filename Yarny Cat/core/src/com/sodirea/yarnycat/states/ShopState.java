@@ -24,15 +24,23 @@ import com.sodirea.yarnycat.sprites.Animation;
 
 public class ShopState extends State {
 
-    private Array<ImageButton> skinsArray;
+    private Array<ImageButton> skinsArray; // the active skinsArray to be displayed
+    private Array<ImageButton> skinsArray100;
+    private Array<ImageButton> skinsArray250;
     private ImageButton catBtn;
     private ImageButton hellcatBtn;
     private Image shopScreen;
     private Image shopScroll;
     private Texture backBtn;
     private Stage stage;
+    private String activePrice = "100";
+    private Array<ImageButton> priceBtns;
+    private ImageButton price100;
+    private ImageButton price250;
     private ScrollPane scrollPane;
-    private Table btnTable;
+    private Table btnTable; // the active btnTable to be displayed
+    private Table btnTable100;
+    private Table btnTable250;
     private Preferences pref;
     private Texture currencyIcon;
     private BitmapFont fingerpaint32;
@@ -50,7 +58,6 @@ public class ShopState extends State {
         currencyIcon = new Texture("fish.png");
         fingerpaint32 = new BitmapFont(Gdx.files.internal("fingerpaint32.fnt"), Gdx.files.internal("fingerpaint32.png"), false);
         fingerpaint32.setColor(new Color(0, (float) 191/255, (float) 241/255, 1));
-        skinsArray = new Array<ImageButton>();
 
         catSkinName = pref.getString("catskin", "cat");
         catArray = new Array<Texture>();
@@ -65,31 +72,42 @@ public class ShopState extends State {
         stage = new Stage(new StretchViewport(cam.viewportWidth, cam.viewportHeight));
         Gdx.input.setInputProcessor(stage);
         stage.setDebugAll(true);///////
-        btnTable = new Table();
+
+        price100 = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("price100.png"))));
+        price100.setPosition(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10 + shopScroll.getHeight());
+        price100.setName("100");
+        price250 = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("price250.png"))));
+        price250.setPosition(cam.position.x - shopScroll.getWidth() / 2 + price100.getWidth(), cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10 + shopScroll.getHeight());
+        price250.setName("250");
+        price250.getImage().setColor(Color.GRAY);
+        priceBtns = new Array<ImageButton>();
+        priceBtns.add(price100);
+        priceBtns.add(price250);
+
+
+        skinsArray100 = new Array<ImageButton>();
+        skinsArray250 = new Array<ImageButton>();
+        btnTable100 = new Table();
+        btnTable250 = new Table();
+
+        skinsArray = skinsArray100; // point to the same array as the currently selected tab
+        btnTable = btnTable100;
         btnTable.align(Align.topLeft);
         scrollPane = new ScrollPane(btnTable);
-        scrollPane.setBounds(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 15, shopScroll.getWidth(), shopScroll.getHeight());
-        shopScroll.setPosition(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 15);
+        scrollPane.setBounds(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10, shopScroll.getWidth(), shopScroll.getHeight());
+        shopScroll.setPosition(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10);
         stage.addActor(shopScreen);
         stage.addActor(shopScroll);
+        stage.addActor(price100);
+        stage.addActor(price250);
         stage.addActor(scrollPane);
 
         // add buttons for each skin here
         catBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("cat skins/cat/cat1.png"))));
         hellcatBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("cat skins/hellcat/hellcat1.png"))));
 
-        // add an identifying string for the skin of each button here
-        catBtn.setName("cat");
-        hellcatBtn.setName("hellcat");
-
-        // add each button to the table in the scrollpane here
-        btnTable.add(catBtn);
-        //btnTable.row();
-        btnTable.add(hellcatBtn);
-
-        // add each button to the overall array here (for use in checking if each button is clicked in handleInput())
-        skinsArray.add(catBtn);
-        skinsArray.add(hellcatBtn);
+        initSkinBtn(catBtn, "cat");
+        initSkinBtn(hellcatBtn, "hellcat");
     }
 
     @Override
@@ -107,37 +125,52 @@ public class ShopState extends State {
             if (skin.isPressed()) {
                 // checking if they own the current skin. if they do, then switch to this current skin, i.e. animate it. if they don't, then prompt them to purchase)
                 if (pref.getBoolean(skin.getName() + "Own", false)) {
-                    catSkinName = skin.getName();
-                    catArray.removeRange(0, catArray.size - 1);
-                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "1.png"));
-                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "2.png"));
-                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "3.png"));
-                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "4.png"));
-                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "5.png"));
-                    catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "6.png"));
-                    catAnim = new Animation(catArray, 0.2f);
-                    pref.putString("catskin", catSkinName);
-                    pref.flush();
+                    if (catSkinName != skin.getName()) { // checking if their active skin is the same as the skin they clicked (don't update the animation if it is
+                        catSkinName = skin.getName();
+                        updateSkinAnimation();
+                        pref.putString("catskin", catSkinName);
+                        pref.flush();
+                    }
                 } else {
                     // if they have sufficient currency, buy it and make it the active skin. otherwise, prompt that they don't have enough money
                     if (pref.getInteger("currency", 0) >= pref.getInteger(skin.getName() + "Price")) {
                         pref.putInteger("currency", pref.getInteger("currency") - pref.getInteger(skin.getName() + "Price"));
                         pref.putBoolean(skin.getName() + "Own", true);
                         catSkinName = skin.getName();
-                        catArray.removeRange(0, catArray.size - 1);
-                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "1.png"));
-                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "2.png"));
-                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "3.png"));
-                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "4.png"));
-                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "5.png"));
-                        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "6.png"));
-                        catAnim = new Animation(catArray, 0.2f);
+                        updateSkinAnimation();
                         pref.putString("catskin", catSkinName);
                         pref.flush();
                     } else {
-                        System.out.println("Not enough fish!");
+                        System.out.println("Not enough fish!"); ////////////////// change for an Image overlayed on the stage.
                     }
                 }
+            }
+        }
+        for (int i = 0; i < priceBtns.size; i++) {
+            ImageButton priceBtn = priceBtns.get(i);
+            if (priceBtn.isPressed()) {
+                for (ImageButton activeBtn : priceBtns) {
+                    if (activeBtn.getName().equals(activePrice)) {
+                        activeBtn.getImage().setColor(Color.LIGHT_GRAY);
+                        break;
+                    }
+                }
+                priceBtn.getImage().setColor(Color.WHITE);
+                activePrice = priceBtn.getName();
+
+                // pointing btnTable and skinsArray to the new price that they selected
+                if (priceBtn.getName() == "100") {
+                    btnTable = btnTable100;
+                    skinsArray = skinsArray100;
+                } else if (priceBtn.getName() == "250") {
+                    btnTable = btnTable250;
+                    skinsArray = skinsArray250;
+                }
+                scrollPane.remove(); // remove the current scrollpane with old skins
+                scrollPane = new ScrollPane(btnTable); // updating the scrollpane to display the new skins
+                scrollPane.setBounds(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10, shopScroll.getWidth(), shopScroll.getHeight());
+                shopScroll.setPosition(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10);
+                stage.addActor(scrollPane);
             }
         }
     }
@@ -185,5 +218,27 @@ public class ShopState extends State {
         fingerpaint32.dispose();
         currencyIcon.dispose();
         stage.dispose();
+    }
+
+    public void initSkinBtn(ImageButton btn, String name) { // sets name of btn, adds to (appropriate) btn table, and adds to (appropriate) array of btns
+        btn.setName(name);
+        if (pref.getInteger(name + "Price") == 100) {
+            btnTable100.add(btn);
+            skinsArray100.add(btn);
+        } else if (pref.getInteger(name + "Price") == 250) {
+            btnTable250.add(btn);
+            skinsArray250.add(btn);
+        }
+    }
+
+    public void updateSkinAnimation() { // removes all frames of current skin from array, and puts the frames of the new skin into the array. only use this method after updating catSkinName to the new chosen skin
+        catArray.removeRange(0, catArray.size - 1);
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "1.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "2.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "3.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "4.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "5.png"));
+        catArray.add(new Texture("cat skins/" + catSkinName + "/" + catSkinName + "6.png"));
+        catAnim = new Animation(catArray, 0.2f);
     }
 }
