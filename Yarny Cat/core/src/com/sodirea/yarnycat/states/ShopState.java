@@ -27,8 +27,13 @@ public class ShopState extends State {
     private Array<ImageButton> skinsArray; // the active skinsArray to be displayed
     private Array<ImageButton> skinsArray100;
     private Array<ImageButton> skinsArray250;
+    private Array<ImageButton> skinsArray500;
+    private Array<ImageButton> skinsArray1000;
     private ImageButton catBtn;
     private ImageButton hellcatBtn;
+    private ImageButton lightningBtn;
+    private ImageButton tigerBtn;
+    private ImageButton phoenixBtn;
     private Image shopScreen;
     private Image shopScroll;
     private Texture backBtn;
@@ -37,10 +42,14 @@ public class ShopState extends State {
     private Array<ImageButton> priceBtns;
     private ImageButton price100;
     private ImageButton price250;
+    private ImageButton price500;
+    private ImageButton price1000;
     private ScrollPane scrollPane;
     private Table btnTable; // the active btnTable to be displayed
     private Table btnTable100;
     private Table btnTable250;
+    private Table btnTable500;
+    private Table btnTable1000;
     private Preferences pref;
     private Texture currencyIcon;
     private BitmapFont fingerpaint32;
@@ -71,7 +80,6 @@ public class ShopState extends State {
 
         stage = new Stage(new StretchViewport(cam.viewportWidth, cam.viewportHeight));
         Gdx.input.setInputProcessor(stage);
-        stage.setDebugAll(true);///////
 
         price100 = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("price100.png"))));
         price100.setPosition(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10 + shopScroll.getHeight());
@@ -79,20 +87,37 @@ public class ShopState extends State {
         price250 = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("price250.png"))));
         price250.setPosition(cam.position.x - shopScroll.getWidth() / 2 + price100.getWidth(), cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10 + shopScroll.getHeight());
         price250.setName("250");
-        price250.getImage().setColor(Color.GRAY);
+        price250.getImage().setColor(Color.LIGHT_GRAY);
+        price500 = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("price500.png"))));
+        price500.setPosition(cam.position.x - shopScroll.getWidth() / 2 + 2 * price250.getWidth(), cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10 + shopScroll.getHeight());
+        price500.setName("500");
+        price500.getImage().setColor(Color.LIGHT_GRAY);
+        price1000 = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("price1000.png"))));
+        price1000.setPosition(cam.position.x - shopScroll.getWidth() / 2 + 3 * price500.getWidth(), cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10 + shopScroll.getHeight());
+        price1000.setName("1000");
+        price1000.getImage().setColor(Color.LIGHT_GRAY);
+
         priceBtns = new Array<ImageButton>();
         priceBtns.add(price100);
         priceBtns.add(price250);
-
+        priceBtns.add(price500);
+        priceBtns.add(price1000);
 
         skinsArray100 = new Array<ImageButton>();
         skinsArray250 = new Array<ImageButton>();
+        skinsArray500 = new Array<ImageButton>();
+        skinsArray1000 = new Array<ImageButton>();
         btnTable100 = new Table();
         btnTable250 = new Table();
+        btnTable500 = new Table();
+        btnTable1000 = new Table();
+        btnTable100.align(Align.topLeft);
+        btnTable250.align(Align.topLeft);
+        btnTable500.align(Align.topLeft);
+        btnTable1000.align(Align.topLeft);
 
         skinsArray = skinsArray100; // point to the same array as the currently selected tab
         btnTable = btnTable100;
-        btnTable.align(Align.topLeft);
         scrollPane = new ScrollPane(btnTable);
         scrollPane.setBounds(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10, shopScroll.getWidth(), shopScroll.getHeight());
         shopScroll.setPosition(cam.position.x - shopScroll.getWidth() / 2, cam.position.y - shopScroll.getHeight() / 2 - shopScroll.getHeight() / 10);
@@ -100,14 +125,22 @@ public class ShopState extends State {
         stage.addActor(shopScroll);
         stage.addActor(price100);
         stage.addActor(price250);
+        stage.addActor(price500);
+        stage.addActor(price1000);
         stage.addActor(scrollPane);
 
         // add buttons for each skin here
         catBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("cat skins/cat/cat1.png"))));
         hellcatBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("cat skins/hellcat/hellcat1.png"))));
+        lightningBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("cat skins/lightning/lightning1.png"))));
+        tigerBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("cat skins/tiger/tiger1.png"))));
+        phoenixBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(new Texture("cat skins/phoenix/phoenix1.png"))));
 
         initSkinBtn(catBtn, "cat");
         initSkinBtn(hellcatBtn, "hellcat");
+        initSkinBtn(lightningBtn, "lightning");
+        initSkinBtn(tigerBtn, "tiger");
+        initSkinBtn(phoenixBtn, "phoenix");
     }
 
     @Override
@@ -140,8 +173,6 @@ public class ShopState extends State {
                         updateSkinAnimation();
                         pref.putString("catskin", catSkinName);
                         pref.flush();
-                    } else {
-                        System.out.println("Not enough fish!"); ////////////////// change for an Image overlayed on the stage.
                     }
                 }
             }
@@ -165,6 +196,12 @@ public class ShopState extends State {
                 } else if (priceBtn.getName() == "250") {
                     btnTable = btnTable250;
                     skinsArray = skinsArray250;
+                } else if (priceBtn.getName() == "500") {
+                    btnTable = btnTable500;
+                    skinsArray = skinsArray500;
+                } else if (priceBtn.getName() == "1000") {
+                    btnTable = btnTable1000;
+                    skinsArray = skinsArray1000;
                 }
                 scrollPane.remove(); // remove the current scrollpane with old skins
                 scrollPane = new ScrollPane(btnTable); // updating the scrollpane to display the new skins
@@ -193,7 +230,7 @@ public class ShopState extends State {
             }
             // checking if they own the current skin. if they don't, then set the button's image's colour to a gray tint (to signify that it's unpurchased)
             if (!pref.getBoolean(skin.getName() + "Own", false)) {
-                skin.getImage().setColor(Color.GRAY); // maybe use light_gray instead, for more visibility?
+                skin.getImage().setColor(Color.GRAY);
             }
         }
         stage.act(dt);
@@ -228,6 +265,12 @@ public class ShopState extends State {
         } else if (pref.getInteger(name + "Price") == 250) {
             btnTable250.add(btn);
             skinsArray250.add(btn);
+        } else if (pref.getInteger(name + "Price") == 500) {
+            btnTable500.add(btn);
+            skinsArray500.add(btn);
+        } else if (pref.getInteger(name + "Price") == 1000) {
+            btnTable1000.add(btn);
+            skinsArray1000.add(btn);
         }
     }
 

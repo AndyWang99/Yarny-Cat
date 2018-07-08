@@ -39,6 +39,9 @@ public class YarnyCat extends ApplicationAdapter {
 		pref.putBoolean("catOwn", true); // give them ownership of the default cat skin
 		pref.putInteger("catPrice", 100);
 		pref.putInteger("hellcatPrice", 100); // init cost of skins
+		pref.putInteger("lightningPrice", 250);
+		pref.putInteger("tigerPrice", 500);
+		pref.putInteger("phoenixPrice", 1000);
 		pref.flush();
 		gsm.push(new MenuState(gsm)); // Seeing main menu is first thing they should see when opening app
 	}
